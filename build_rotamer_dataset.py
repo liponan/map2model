@@ -23,10 +23,15 @@ def main():
             df = parse_h5_attrs(h5_file)
             df.to_csv(dest_path)
         except OSError:
-            print("cannot process {}".format(h5_file))
+            print("[OSError] cannot process {}".format(h5_file))
             if args.error_log is not None:
                 with open(args.error_log, "a") as f:
-                    f.write("{}, {}\n".format(pdb_id, h5_file))
+                    f.write("{}, {}, {}\n".format(pdb_id, h5_file, "OSError"))
+        except KeyError:
+            print("[KeyError] cannot process {}".format(h5_file))
+            if args.error_log is not None:
+                with open(args.error_log, "a") as f:
+                    f.write("{}, {}, {}\n".format(pdb_id, h5_file, "KeyError"))
                     
 
 if __name__ == "__main__":
