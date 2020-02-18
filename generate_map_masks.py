@@ -8,7 +8,7 @@ from scipy.ndimage import gaussian_filter
 from m2m_utils import list_files, parse_h5_attrs, parse_pdb_id, load_h5_map, save_h5_map
 
 
-def generate_masked_data(h5_file, verbose=True):
+def generate_masked_data(h5_file, sigma=10, verbose=True):
     data = load_h5_map(h5_file)
     mask = np.zeros_like(data, dtype=np.float)
     df = parse_h5_attrs(h5_file, posfix="_xyz")
@@ -23,7 +23,7 @@ def generate_masked_data(h5_file, verbose=True):
                 continue
             else:
                 mask[int(coor[2]), int(coor[1]), int(coor[0])] = 1
-    mask = gaussian_filter(mask, sigma=10)
+    mask = gaussian_filter(mask, sigma=sigma)
     mask = mask / np.max(mask)
     print("mask max", np.max(mask))
     data = data * mask
@@ -44,9 +44,11 @@ def main():
     for h5_file in h5_files:
         pdb_id = parse_pdb_id(h5_file)
         print("{} => {}".format(h5_file, pdb_id))
-        data = generate_masked_data(h5_file)
-        save_h5_map(data, os.path.join(args.output_path, "{}.h5".format(pdb_id)))
-
+        try:
+            data = generate_masked_data(h5_file)
+            save_h5_map(data, os.path.join(args.output_path, "{}.h5".format(pdb_id)))
+        except:
+            print("couldn't process {}".format(pdb_id))
 
 
 if __name__ == "__main__":
