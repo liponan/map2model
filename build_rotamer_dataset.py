@@ -21,8 +21,8 @@ def main():
         print("({}) {} => {}".format(pdb_id, h5_file, dest_path))
         try:
             df = parse_h5_attrs(h5_file)
-            df.to_csv()
-        except:
+            df.to_csv(dest_path)
+        except OSError:
             print("cannot process {}".format(h5_file))
             if args.error_log is not None:
                 with open(args.error_log, "a") as f:
