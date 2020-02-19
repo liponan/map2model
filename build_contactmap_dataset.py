@@ -10,16 +10,21 @@ def quality_check(df, verbose=False):
     chains = set(df["chain"])
     results = dict()
     for chain in chains:
-        my_df = df.query("chain == '{}'".format(chain)).dropna(subset=["CA"])
+        my_df = df.query("chain == '{}'".format(chain))
+        my_df = my_df.dropna(subset=["CA"])
         n_res = len(my_df)
         n_range = my_df["no"].max()-my_df["no"].min()+1
-        results[chain] = n_res==n_range
+        results[chain] = (n_res==n_range) and n_res>2
     return results
 
 
 def get_ca_coors(df, chain):
-    my_df = df.query("chain == '{}'".format(chain)).sort_values(by="no")
-    ca_coors = np.concatenate(my_df["CA"].values, axis=0).reshape(-1, 3)
+    my_df = df.query("chain == '{}'".format(chain)).dropna().sort_values(by="no")
+    try:
+        ca_coors = np.concatenate(my_df["CA"].values, axis=0).reshape(-1, 3)
+    except ValueError:
+        print(my_df["CA"].dropna())
+        print(my_df["CA"].values)
     return ca_coors
     
        
@@ -56,10 +61,15 @@ def main():
             if args.verbose:
                 print(pdb, chains)
             for chain in chains:
+                if chains[chain]:
+                    pass
+                else:
+                    print("{}/{} skipped".format(pdb, chain))
+                    continue
                 ca_coors = get_ca_coors(my_df, chain)
                 ca_ca_dist = 0.25*np.mean(np.linalg.norm(ca_coors[0:-1,:]-ca_coors[1:,:], axis=1))
                 ca_ca_dists.append(ca_ca_dist)
-                print(pdb, chain, "mean CA-CA distance: {:.2f} A".format(ca_ca_dist))
+                print("{}/{} mean CA-CA distance: {:.2f} A".format(pdb, chain, ca_ca_dist))
                 ca_coors_ds = f.create_dataset("CA/{}/{}".format(pdb, chain), ca_coors.shape, dtype=np.float)
                 ca_coors_ds[()] = ca_coors
         f.close()
