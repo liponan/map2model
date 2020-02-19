@@ -31,5 +31,5 @@ def contact_matrix(ids):
     n = ids.shape[0]
     id_a = np.repeat(ids.reshape(n, 1), n, axis=1)
     id_b = np.repeat(ids.reshape(1, n), n, axis=0)
-    contact_mat = (id_a-id_b) == 1
+    contact_mat = 1*((id_a-id_b) == 1)
     return contact_mat
