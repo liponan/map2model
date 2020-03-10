@@ -15,6 +15,8 @@ def parse_args():
     p.add_argument("--output_path", type=str, default="./", help="Where to put dataset df files")
     p.add_argument("--output_prefix", type=str, default="", help="Prefix for output files")
     p.add_argument("--error_log", type=str, default=None, help="Log h5 files that coulnd't be processed")
+    p.add_argument("--verbose", "-v", default=False, action="store_true",
+                   help="Be verbose")
     return p.parse_args()
 
 
@@ -28,7 +30,7 @@ def main():
     for subset in ["val", "test", "train"]:
         print("==================== {} ====================".format(subset))
         df_subset = df_master.query("subset == '{}'".format(subset))
-        print("{} samples".format(len(df_subset)))
+        n1 = len(df_subset)
         if len(df_subset) <= 0:
             continue
         if subset == "val" and args.n_val:
@@ -37,18 +39,22 @@ def main():
             df_subset = df_subset.sample(args.n_test)
         if subset == "train" and args.n_train:
             df_subset = df_subset.sample(args.n_train)
+        n2 = len(df_subset)    
+        print("picking {} out of {} samples".format(n2, n1))
         df_rotamers = list()
         for i in range(len(df_subset)):
-            pdb, resolution, subset = df_master.iloc[i][["PDB", "resolution", "subset"]]
+            pdb, resolution = df_subset.iloc[i][["PDB", "resolution"]]
             my_df = pd.read_hdf(df_avai_pdbs.at[pdb, "path"], "df")[["rot_label", "aa_label", "O", "C", "CA", "N"]]
             my_df = my_df.dropna(subset=["O", "C", "CA", "N"])
             my_df["PDB"] = pdb
             my_df["resolution"] = resolution
             my_df["subset"] = subset
-            print(pdb, resolution, subset, "{} residues".format(len(my_df)))
+            if args.verbose:
+                print(pdb, resolution, subset, "{} residues".format(len(my_df)))
             df_rotamers.append(my_df) 
         df_rotamers = pd.concat(df_rotamers, axis=0, ignore_index=True) #.reset_index(drop=True)
-        print(df_rotamers)
+        if args.verbose:
+            print(df_rotamers)
         print("mean O  coor", np.mean(df_rotamers["O"].values))
         print("mean C  coor", np.mean(df_rotamers["C"].values))
         print("mean CA coor", np.mean(df_rotamers["CA"].values))
