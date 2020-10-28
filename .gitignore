@@ -1,0 +1,8 @@
+*.pyc
+pdb_data/
+results/
+backup/
+output/
+data/
+figs/
+
