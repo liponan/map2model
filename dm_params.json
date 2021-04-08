@@ -1,0 +1,40 @@
+{
+  "seed": 2020,
+  "net":
+  {
+    "n_filters": 40,
+    "bottleneck": false
+  },
+  "train":
+  {
+    "pdb_list": "/home/liponan/data/train_short.list",
+    "data_root": "/home/liponan/data/",
+    "batch_size": 1,
+    "num_workers": 4,
+    "n_epochs": 1,
+    "lr": 0.01,
+    "backprop_every": 1,
+    "backup_every": 100,
+    "backup_path": "/home/liponan/data/backup/debug/",
+    "loss":
+    {
+      "cat_weight": 10.0,
+      "ca_weight": 20.0,
+      "c_weight": 5.0,
+      "n_weight": 5.0,
+      "o_weight": 5.0,
+      "pos_weight_factor": 1.0,
+      "c_ca": 1.56,
+      "n_ca": 1.51,
+      "o_ca": 2.43,
+      "cutoff": 0.1
+    }
+  },
+  "val":
+  {
+    "pdb_list": "/home/liponan/data/val.list",
+    "data_root": "/home/liponan/data/",
+    "batch_size": 1,
+    "num_workers": 4
+  }
+}
